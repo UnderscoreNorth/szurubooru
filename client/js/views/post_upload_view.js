@@ -4,7 +4,9 @@ const events = require("../events.js");
 const api = require("../api.js");
 const views = require("../util/views.js");
 const misc = require("../util/misc.js");
+const TagList = require("../models/tag_list.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
+const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js");
 
 const template = views.getTemplate("post-upload");
 const rowTemplate = views.getTemplate("post-upload-row");
@@ -420,6 +422,41 @@ class PostUploadView extends events.EventTarget {
             .addEventListener("click", (e) =>
                 this._evtMoveClick(e, uploadable, 1)
             );
+
+        this._installTagAutoComplete(rowNode);
+    }
+
+    _installTagAutoComplete(rowNode) {
+        const tagsInputNode = rowNode.querySelector(".tags input");
+        if (!tagsInputNode) {
+            return;
+        }
+        let tagAutoCompleteControl = new TagAutoCompleteControl(
+            tagsInputNode,
+            {
+                isTaggedWith: (tagName) =>
+                    misc
+                        .splitByWhitespace(tagsInputNode.value)
+                        .map((name) => name.toLowerCase())
+                        .includes(tagName.toLowerCase()),
+                confirm: (tag) => {
+                    let tagList = new TagList();
+                    tagList.addByName(tag.names[0], true).then(
+                        () => {
+                            return tagList
+                                .map((confirmedTag) => confirmedTag.names[0])
+                                .join(" ");
+                        },
+                        () => tag.names[0]
+                    ).then((tagNames) => {
+                        tagAutoCompleteControl.replaceSelectedText(
+                            tagNames,
+                            false
+                        );
+                    });
+                },
+            }
+        );
     }
 
     _updateThumbnailNode(uploadable) {
