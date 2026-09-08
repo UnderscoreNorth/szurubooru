@@ -28,4 +28,7 @@
         %>
 
     <% } else { console.log(new Error('Unknown post type')); } %>
+
+    <div class='resize-listener'>
+    </div>
 </div>
