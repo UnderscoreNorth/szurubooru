@@ -67,6 +67,15 @@
                 <% } %>
             </div>
 
+            <div class='tags'>
+                <%= ctx.makeTextInput({
+                    text: 'Tags',
+                    name: 'tags',
+                    value: ctx.uploadable.tags.join(' '),
+                    placeholder: 'At least one tag is required',
+                }) %>
+            </div>
+
             <div class='messages'></div>
 
             <% if (ctx.uploadable.lookalikes.length) { %>

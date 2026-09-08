@@ -3,6 +3,7 @@
 const events = require("../events.js");
 const api = require("../api.js");
 const views = require("../util/views.js");
+const misc = require("../util/misc.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
 
 const template = views.getTemplate("post-upload");
@@ -287,6 +288,21 @@ class PostUploadView extends events.EventTarget {
         for (let uploadable of this._uploadables) {
             this._updateUploadableFromDom(uploadable);
         }
+
+        const untaggedUploadables = this._uploadables.filter(
+            (uploadable) => !uploadable.tags.length
+        );
+        if (untaggedUploadables.length) {
+            this.clearMessages();
+            for (let uploadable of untaggedUploadables) {
+                this.showError(
+                    "At least one tag is required.",
+                    uploadable
+                );
+            }
+            return;
+        }
+
         this._submitButtonNode.value = "Resume";
         this._emit("submit");
     }
@@ -306,7 +322,10 @@ class PostUploadView extends events.EventTarget {
             uploadable.anonymous = true;
         }
 
-        uploadable.tags = [];
+        const tagsNode = rowNode.querySelector(".tags input");
+        uploadable.tags = tagsNode
+            ? misc.splitByWhitespace(tagsNode.value)
+            : [];
         uploadable.relations = [];
         for (let [i, lookalike] of uploadable.lookalikes.entries()) {
             let lookalikeNode = rowNode.querySelector(
