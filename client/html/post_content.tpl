@@ -28,7 +28,4 @@
         %>
 
     <% } else { console.log(new Error('Unknown post type')); } %>
-
-    <div class='post-overlay resize-listener'>
-    </div>
 </div>
